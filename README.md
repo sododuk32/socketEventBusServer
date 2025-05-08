@@ -4,7 +4,8 @@
 해당 키는 배치나 크론잡을 통해 매일 업데이트 할 수 있게할 예정. 
 
 유저 연결 객체 ( NODE WebSocket 으로 이뤄진 유저 LIST ) <ㅡ> 서버 <-> 한투 연결 객체 ( ExternalConnector )
-[ public clients = new Map<string, SocketClient>() ]  <-> 서버 <-> [ExternalConnector]
+</br>
+[ public clients = new Map<string, SocketClient> ]  <-> 서버 <-> [ExternalConnector]
  
 이렇게 양방향을 연결하는 서버로서 
 
