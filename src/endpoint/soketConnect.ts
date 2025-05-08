@@ -8,7 +8,7 @@ export const SocketEndpoints: EndpointsRecord = {
       custtype: 'P',
       tr_type: '1',
       // 'content-type': 'utf-8',
-      approval_key: 'eb0c7128-7491-44e9-9bfb-07738d3fc58c',
+      approval_key: 's',
     },
     bodyTemplate: {
       tr_id: 'H0STCNT0',
