@@ -5,8 +5,9 @@
 
 유저 연결 객체 ( NODE WebSocket 으로 이뤄진 유저 LIST ) <ㅡ> 서버 <-> 한투 연결 객체 ( ExternalConnector )
 </br>
-[ public clients = new Map<string, SocketClient> ]  <-> 서버 <-> [ExternalConnector]
- 
+![socket event bus architecture](https://github.com/sododuk32/socketEventBusServer/blob/main/archi.jpg?raw=true)
+
+
 이렇게 양방향을 연결하는 서버로서 
 
 서버 기준으로 유저와 한투쪽으로 EventBroker를 사용해 메시지를 보내서 각 클래스의 동작을 사용 및 핸들링함. 
