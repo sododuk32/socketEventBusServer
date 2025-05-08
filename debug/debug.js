@@ -5,7 +5,7 @@ const ws = new WebSocket('ws://ops.koreainvestment.com:21000');
 ws.on('open', () => {
   const payload = {
     header: {
-      approval_key: 'eb0c7128-7491-44e9-9bfb-07738d3fc58c',
+      approval_key: '657',
       custtype: 'P',
       tr_type: '1',
     },
