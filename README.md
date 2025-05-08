@@ -1,7 +1,7 @@
 양 방향 이벤트 버스 소켓 서버. 
 소켓전용 api-key는 추후 DB에서 관리할 예정. 
 
-해당 키는 배치나 크론잡을 통해 매일 업데이트. 
+해당 키는 배치나 크론잡을 통해 매일 업데이트 할 수 있게할 예정. 
 
 유저 연결 객체 ( NODE WebSocket 으로 이뤄진 유저 LIST ) <ㅡ> 서버 <-> 한투 연결 객체 ( ExternalConnector )
 [ public clients = new Map<string, SocketClient>() ]  <-> 서버 <-> [ExternalConnector]
