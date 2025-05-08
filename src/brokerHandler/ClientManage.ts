@@ -5,7 +5,7 @@ import { ExternalConnector } from './outSocket.js';
 
 export const ALLOW_SINGLE_KIS_SESSION = true;
 
-// ClientManager.ts
+
 export class ClientManager {
   public clients = new Map<string, SocketClient>();
 
