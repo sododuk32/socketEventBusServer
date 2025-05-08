@@ -2,9 +2,7 @@
 import { SocketMessageBodyEvent, SocketClient } from '../types/Socket/SocketConnect.js';
 import { EventBrokers } from './eventbroker.js';
 import { ExternalConnector } from './outSocket.js';
-// 예: config.ts 등에 따로 설정값 선언 가능
-// 예: config.ts 등에 따로 설정값 선언 가능
-// 예: config.ts 등에 따로 설정값 선언 가능
+
 export const ALLOW_SINGLE_KIS_SESSION = true;
 
 // ClientManager.ts
