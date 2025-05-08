@@ -25,6 +25,8 @@ export class ExternalConnector {
     details.add(detail);
 
     // 2) 토픽용 WebSocket이 없다면 새로 열기
+    // 구독의 여러 처리부분은 매우 햇갈림. 로직에 많은 기능이 위임되어있음. 
+    
     if (!this.sockets.has(topic)) {
       const ws = new WebSocket(cfg.endpoint, { headers: cfg.header });
       console.log('한투 소캣 열기');
@@ -46,7 +48,7 @@ export class ExternalConnector {
         ws.on('message', (raw) => {
           const str = raw.toString();
 
-          // JSON 메시지인 경우: PINGPONG, SUBSCRIBE SUCCESS 등
+          // JSON 메시지인 경우
           try {
             const parsed = JSON.parse(str);
 
@@ -56,8 +58,8 @@ export class ExternalConnector {
               console.log('✅ 구독 성공:', parsed.header.tr_key);
               return;
             }
-
-            // 여기에 추가적인 JSON 응답 처리 가능
+            
+        
 
             return; // ❗ JSON이면 여기서 종료해야 파이프 포맷으로 안 넘어감
           } catch {
