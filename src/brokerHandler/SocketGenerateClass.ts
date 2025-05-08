@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { HantSocketHead } from '../types/Hant/HTHeaderType.js';
 
-// tr_id	거래ID	String	Y	1	[실전/모의투자]
-// H0STCNT0 : 실시간 주식 체결가
-// tr_key	구분값	String	Y	1	종목번호 (6자리)
-// ETN의 경우, Q로 시작 (EX. Q500001)
+
 
 type Bodyfor = {
   tr_id: string;
