@@ -60,6 +60,7 @@ export class ClientManager {
       }
 
       this.clients.clear();
+      console.log('clear');
     }
 
     let client = this.clients.get(uuid);
@@ -73,6 +74,7 @@ export class ClientManager {
     if (!subs[topic].includes(detail)) {
       subs[topic].push(detail);
     }
+    console.log('subscribe');
 
     if (subs[topic].length === 1) {
       this.externalConnector.subscribe(topic, detail);
@@ -121,7 +123,7 @@ export class ClientManager {
     this.clients.forEach((client: SocketClient) => {
       const details = client.subscriptions[topic];
       if (details && details.includes(detail)) {
-        client.ws.send(JSON.stringify({ type: `${topic}Update`, payload }));
+        client.ws.send(JSON.stringify({ type: 'update', topic: `${topic}`, payload }));
       }
     });
   }

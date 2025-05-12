@@ -14,6 +14,7 @@ export class ExternalConnector {
 
   /** 클라이언트의 subscribe 이벤트가 발생했을 때 호출 */
   subscribe(topic: string, detail: string) {
+    console.log('sub' + topic + detail);
     const cfg = this.configs[topic];
     if (!cfg) throw new Error(`Unknown topic: ${topic}`);
 
@@ -50,18 +51,26 @@ export class ExternalConnector {
           try {
             const parsed = JSON.parse(str);
 
+            console.log(parsed);
+
+            EventBrokers.emit('giveUser', {
+              topic: topic,
+              detail: detail,
+              payload: parsed,
+            });
+
             if (parsed.header?.tr_id === 'PINGPONG') return;
 
             if (parsed.body?.rt_cd === '0' && parsed.body?.msg1?.includes('SUBSCRIBE')) {
-              console.log('✅ 구독 성공:', parsed.header.tr_key);
-              return;
+              console.log('✅ 구독 성공:', parsed);
             }
 
-            // 여기에 추가적인 JSON 응답 처리 가능
+            
 
-            return; // ❗ JSON이면 여기서 종료해야 파이프 포맷으로 안 넘어감
-          } catch {
+            return; // 응답값 존재해야함. json형식이고 올바른 응답값일경우 체결데이터 처리문으로 넘어감.
+          } catch (errors) {
             // JSON이 아닌 경우만 계속 진행
+            console.error('[❌ 파싱 실패]', errors);
           }
 
           // 파이프 포맷이면 여기서 처리
@@ -89,6 +98,8 @@ export class ExternalConnector {
         // 3) 열린 소켓에 detail 기반 구독 요청 보내기
 
         const body = { ...cfg.bodyTemplate, tr_key: detail };
+        console.log(body);
+
         ws.send(JSON.stringify({ header: cfg.header, body }));
       } else {
         ws.on('open', () => {

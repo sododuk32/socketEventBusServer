@@ -31,9 +31,9 @@ export function setupBroker(wss: WebSocketServer) {
 
         console.log(msg);
       } catch {
-        return ws.send(JSON.stringify({ type: 'error', message: 'Invalid JSON' }));
+        return ws.send(JSON.stringify({ type: 'error', message: 'errors' }));
       }
-      const { type, topic, detail } = msg;
+      const { type, topic, detail, isStock } = msg;
       EventBrokers.emit(type, { uuid, topic, detail, ws });
     });
 
