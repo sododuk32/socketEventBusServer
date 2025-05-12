@@ -11,7 +11,7 @@ export function parseKisPipeMessage(rawStr: string) {
   const count = Number(countStr);
   const flat = rest.join('|').split('^');
 
-  // 필드 순서 기준 (전체 데이터 순서에서 우리가 필요한 인덱스만 추출)
+  // 필드 순서 기준 
   const fieldIndexMap = {
     MKSC_SHRN_ISCD: 0,
     STCK_CNTG_HOUR: 1,
@@ -34,7 +34,7 @@ export function parseKisPipeMessage(rawStr: string) {
     STCK_LWPR: '저가',
   };
 
-  const oneLength = 22; // 전체 필드 수 (정확한 길이는 실제 수신에 따라 맞추세요)
+  const oneLength = 22; // 전체 필드 수 
   const records: { data: Record<string, string | null>; korparams: Record<string, string> }[] = [];
 
   for (let i = 0; i < count; i++) {

@@ -23,12 +23,10 @@ export type SocketClientMessage =
   | { type: 'update'; topic: string; payload: unknown }
   | { type: 'error'; message: string };
 
-// approval_key	웹소켓 접속키	String	Y	286	실시간 (웹소켓) 접속키 발급 API(/oauth2/Approval)를 사용하여 발급받은 웹소켓 접속키
-// custtype	고객타입	String	Y	1	B : 법인
-// P : 개인
-// tr_type	거래타입	String	Y	1	1 : 등록
-// 2 : 해제
-// content-type	컨텐츠타입	String	Y	1	utf-8
+// approval_key	웹소켓 접속키 (웹소켓) 접속키 발급 API(/oauth2/Approval)를 사용하여 발급받은 웹소켓 접속키
+// custtype	고객타입		B : 법인
+// tr_type	거래타입		1 : 등록
+// content-type	컨텐츠타입	String utf-8
 export type HantSoketHeader = {
   approval_key: string;
   custtype: 'P' | 'B';

@@ -43,7 +43,5 @@ export function setupBroker(wss: WebSocketServer) {
     });
   });
 
-  // 4) broker 이벤트 연결
-  // subscribe, unsubscribe는 ClientManager 생성자에서 이미 on(…)으로 연결되어 있다고 가정
-  // giveUser/update 이벤트도 manager.broadcast로 연결되어 있어야 합니다
+
 }
