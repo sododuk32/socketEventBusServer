@@ -42,21 +42,22 @@ export class ClientManager {
   subscribe(events: SocketMessageBodyEvent) {
     const { uuid, topic, detail, ws, isStock } = events;
     console.log('manager subscribe  ' + topic);
-
-    // 세션 제한 검사
+    // 세션 제한 검사 => isStock의 경우 기존 topic, detail 제거 로직 실행.
     if (isStock && this.clients.size > 0) {
       console.log('[세션 제한] 기존 세션 존재. 모두 제거 후 새로운 세션으로 교체.');
+      console.log(uuid, topic, detail, isStock);
 
       for (const [existingUUID, client] of this.clients.entries()) {
-        if (existingUUID !== uuid) {
-          // 외부 구독 해제
-          for (const topicKey in client.subscriptions) {
-            for (const detailKey of client.subscriptions[topicKey]) {
-              this.externalConnector.unsubscribe(topicKey, detailKey, uuid);
-            }
+        // if (existingUUID !== uuid) {
+        // 외부 구독 해제
+        for (const topicKey in client.subscriptions) {
+          for (const detailKey of client.subscriptions[topicKey]) {
+            this.externalConnector.unsubscribe(topicKey, detailKey, uuid);
           }
-          EventBrokers.emit('removeClient', existingUUID);
         }
+        console.log('removeClient');
+        EventBrokers.emit('removeClient', existingUUID);
+        // }
       }
 
       this.clients.clear();
@@ -100,6 +101,7 @@ export class ClientManager {
     const client = this.clients.get(uuid);
     if (!client) return;
 
+    // 이런 for 중첩문  다중 노드 트리로 만들고 깊이 우선 탐색으로 처리하면 빠를듯.
     for (const topic of Object.keys(client.subscriptions)) {
       for (const detail of client.subscriptions[topic]) {
         // 1) 다른 클라이언트 중 이 detail을 여전히 쓰는 애가 있는지 확인

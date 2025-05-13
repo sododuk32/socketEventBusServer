@@ -123,6 +123,8 @@ export class ExternalConnector {
       this.sockets.delete(topic);
       this.subscribedDetails.delete(topic);
     }
+    console.log('clear subDetail');
+    console.log(this.subscribedDetails);
   }
 
   /** 클라이언트의 clearSubScreibe 이벤트가 발생했을 때 호출 */
