@@ -10,6 +10,7 @@ import { parse } from 'cookie';
 export function setupBroker(wss: WebSocketServer) {
   const external = new ExternalConnector(SocketEndpoints);
   const manager = new ClientManager(external);
+  console.log('Initial Memory Usage:', process.memoryUsage());
 
   wss.on('connection', (ws, req) => {
     // 1) UUID 체크
@@ -34,7 +35,14 @@ export function setupBroker(wss: WebSocketServer) {
         return ws.send(JSON.stringify({ type: 'error', message: 'errors' }));
       }
       const { type, topic, detail, isStock } = msg;
-      EventBrokers.emit(type, { uuid, topic, detail, ws });
+      EventBrokers.emit(type, { uuid, topic, detail, ws, isStock });
+
+      console.log('Initial Memory Usage:', process.memoryUsage());
+
+      setInterval(() => {
+        const memoryUsage = process.memoryUsage();
+        console.log(`RSS: ${memoryUsage.rss}`);
+      }, 10000);
     });
 
     // 3) 연결 종료 시
@@ -42,6 +50,4 @@ export function setupBroker(wss: WebSocketServer) {
       manager.removeClient(uuid);
     });
   });
-
-
 }

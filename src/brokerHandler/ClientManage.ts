@@ -14,11 +14,11 @@ export class ClientManager {
   ) {
     const broker = EventBrokers;
 
-    broker.on('subscribe', ({ uuid, topic, detail, ws }) =>
-      this.subscribe({ uuid, topic, detail, ws })
+    broker.on('subscribe', ({ uuid, topic, detail, ws, isStock }) =>
+      this.subscribe({ uuid, topic, detail, ws, isStock })
     );
-    broker.on('unsubscribe', ({ uuid, topic, detail, ws }) =>
-      this.unsubscribe({ uuid, topic, detail, ws })
+    broker.on('unsubscribe', ({ uuid, topic, detail, ws, isStock }) =>
+      this.unsubscribe({ uuid, topic, detail, ws, isStock })
     );
     broker.on('removeClient', (uuid) => this.removeClient(uuid));
     broker.on('giveUser', ({ topic, detail, payload }) => this.broadcast(topic, detail, payload));
@@ -37,7 +37,7 @@ export class ClientManager {
 
   /** 구독 처리 */
   subscribe(events: SocketMessageBodyEvent) {
-    const { uuid, topic, detail, ws } = events;
+    const { uuid, topic, detail, ws, isStock } = events;
     console.log('manager subscribe  ' + topic);
 
     // 세션 제한 검사
@@ -49,7 +49,7 @@ export class ClientManager {
           // 외부 구독 해제
           for (const topicKey in client.subscriptions) {
             for (const detailKey of client.subscriptions[topicKey]) {
-              this.externalConnector.unsubscribe(topicKey, detailKey);
+              this.externalConnector.unsubscribe(topicKey, detailKey, uuid);
             }
           }
           EventBrokers.emit('removeClient', existingUUID);
@@ -76,10 +76,11 @@ export class ClientManager {
     if (subs[topic].length === 1) {
       this.externalConnector.subscribe(topic, detail);
     }
+    console.log(this.clients.size);
   }
 
   unsubscribe(events: SocketMessageBodyEvent) {
-    const { uuid, topic, detail } = events;
+    const { uuid, topic, detail, isStock } = events;
     const client = this.clients.get(uuid);
     if (!client) return;
 
@@ -88,19 +89,28 @@ export class ClientManager {
 
     if (client.subscriptions[topic].length === 0) {
       delete client.subscriptions[topic];
-      this.externalConnector.unsubscribe(topic, detail);
+      this.externalConnector.unsubscribe(topic, detail, uuid);
     }
   }
 
   removeClient(uuid: string) {
     const client = this.clients.get(uuid);
-    if (client) {
-      for (const topic of Object.keys(client.subscriptions)) {
-        for (const detail of client.subscriptions[topic]) {
-          this.externalConnector.unsubscribe(topic, detail);
+    if (!client) return;
+
+    for (const topic of Object.keys(client.subscriptions)) {
+      for (const detail of client.subscriptions[topic]) {
+        // 1) 다른 클라이언트 중 이 detail을 여전히 쓰는 애가 있는지 확인
+        const stillUsed = Array.from(this.clients.entries()).some(
+          ([otherUuid, otherClient]) =>
+            otherUuid !== uuid && otherClient.subscriptions[topic]?.includes(detail)
+        );
+        // 2) 아무도 안 쓰면 진짜 언구독
+        if (!stillUsed) {
+          this.externalConnector.unsubscribe(topic, detail, uuid);
         }
       }
     }
+
     this.clients.delete(uuid);
   }
 

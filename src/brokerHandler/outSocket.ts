@@ -27,6 +27,9 @@ export class ExternalConnector {
 
     // 2) 토픽용 WebSocket이 없다면 새로 열기
     // 구독의 여러 처리부분은 매우 햇갈림. 로직에 많은 기능이 위임되어있음.
+    console.log(this.sockets.has(topic));
+    console.log(this.subscribedDetails);
+    console.log(topic);
 
     if (!this.sockets.has(topic)) {
       const ws = new WebSocket(cfg.endpoint, { headers: cfg.header });
@@ -65,6 +68,7 @@ export class ExternalConnector {
             // pipe 포맷 메시지
             try {
               const parsedPipe = parseKisPipeMessage(str);
+              console.log(parsedPipe.records);
               EventBrokers.emit('giveUser', {
                 topic,
                 detail,
@@ -99,14 +103,20 @@ export class ExternalConnector {
   }
 
   /** 클라이언트의 unsubscribe 이벤트가 발생했을 때 호출 */
-  unsubscribe(topic: string, detail: string) {
+  unsubscribe(topic: string, detail: string, uuid: string) {
     const cfg = this.configs[topic];
     const ws = this.sockets.get(topic);
     const details = this.subscribedDetails.get(topic);
-    if (!cfg || !ws || !details) return;
+    if ((uuid && !cfg) || !ws || !details) {
+      return '';
+    }
+    console.log(this.configs[topic]);
 
-    // 1) 로컬 detail 목록에서 제거
-    details.delete(detail);
+    console.log(details);
+    details.clear();
+    console.log('cloear 이후');
+
+    console.log(details);
 
     // 2) 3자 서버에 해제 요청 전송
     const body = { ...cfg.bodyTemplate, tr_key: detail, unsub: true };
@@ -114,9 +124,25 @@ export class ExternalConnector {
 
     // 3) 더 이상 남은 detail이 없으면 소켓 닫기
     if (details.size === 0) {
+      ws.removeAllListeners();
       ws.close();
       this.sockets.delete(topic);
       this.subscribedDetails.delete(topic);
     }
+  }
+
+  /** 클라이언트의 clearSubScreibe 이벤트가 발생했을 때 호출 */
+  clearSubScreibe(uuid: string, topic: string) {
+    const ws = this.sockets.get(topic);
+    const details = this.subscribedDetails.has(topic);
+
+    if (!ws) {
+      return;
+    }
+
+    ws.removeAllListeners();
+    ws.close();
+    this.sockets.delete(topic);
+    this.subscribedDetails.delete(topic);
   }
 }

@@ -15,6 +15,7 @@ export type SocketMessageBodyEvent = {
   detail: string;
   uuid: string;
   ws: WebSocket;
+  isStock?: boolean;
 };
 
 export type SocketClientMessage =
