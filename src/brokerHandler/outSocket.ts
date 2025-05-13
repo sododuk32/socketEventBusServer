@@ -2,7 +2,7 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { EventBrokers } from './eventbroker.js';
 import { EndpointsRecord } from '../types/Socket/SocketConnect.js';
-import { parseKisPipeMessage } from './parseHant.js';
+import { parseKisPipeMessage, toText } from './parseHant.js';
 
 export class ExternalConnector {
   // topic → WebSocket 인스턴스
@@ -47,45 +47,32 @@ export class ExternalConnector {
           ws.send(JSON.stringify(payload));
         });
         ws.on('message', (raw) => {
-          const str = raw.toString();
+          // 어떤 형태로 오든 문자열로 통일
+          const str = toText(raw);
 
-          // JSON 메시지인 경우
-          try {
-            const parsed = JSON.parse(str);
-
-            console.log(parsed);
-
-            EventBrokers.emit('giveUser', {
-              topic: topic,
-              detail: detail,
-              payload: parsed,
-            });
-
-            if (parsed.header?.tr_id === 'PINGPONG') return;
-
-            if (parsed.body?.rt_cd === '0' && parsed.body?.msg1?.includes('SUBSCRIBE')) {
-              console.log('✅ 구독 성공:', parsed);
+          // JSON인지 파이프 포맷인지 구분
+          const trimmed = str.trim();
+          if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+            // JSON control message
+            try {
+              const parsed = JSON.parse(trimmed);
+              console.log('JSON message:', parsed);
+              // ... 추가 처리 (PINGPONG, SUBSCRIBE SUCCESS 등) ...
+            } catch (jsonErr) {
+              console.error('Invalid JSON frame:', jsonErr);
             }
-
-            // 여기에 추가적인 JSON 응답 처리 가능
-
-            return; // ❗ JSON이면 여기서 종료해야 파이프 포맷으로 안 넘어감
-          } catch {
-            // JSON이 아닌 경우만 계속 진행
-            console.error('[❌ 파싱 실패]', errors);
-          }
-
-          // 파이프 포맷이면 여기서 처리
-          try {
-            const parsed = parseKisPipeMessage(str);
-            console.log('📈 체결 데이터:', parsed.records);
-            EventBrokers.emit('giveUser', {
-              topic: topic,
-              detail: detail,
-              payload: parsed.records,
-            });
-          } catch (err) {
-            console.error('[❌ 파싱 실패]', err);
+          } else {
+            // pipe 포맷 메시지
+            try {
+              const parsedPipe = parseKisPipeMessage(str);
+              EventBrokers.emit('giveUser', {
+                topic,
+                detail,
+                payload: parsedPipe.records,
+              });
+            } catch (pipeErr) {
+              console.error('[❌ pipe parsing failed]', pipeErr, 'raw=', str);
+            }
           }
         });
 
@@ -100,7 +87,6 @@ export class ExternalConnector {
         // 3) 열린 소켓에 detail 기반 구독 요청 보내기
 
         const body = { ...cfg.bodyTemplate, tr_key: detail };
-        console.log(body);
 
         ws.send(JSON.stringify({ header: cfg.header, body }));
       } else {

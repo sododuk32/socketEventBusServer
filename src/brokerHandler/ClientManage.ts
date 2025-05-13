@@ -5,7 +5,6 @@ import { ExternalConnector } from './outSocket.js';
 
 export const ALLOW_SINGLE_KIS_SESSION = true;
 
-
 export class ClientManager {
   public clients = new Map<string, SocketClient>();
 
@@ -117,7 +116,6 @@ export class ClientManager {
   }
 
   broadcast(topic: string, detail: string, payload: unknown) {
-    console.log('manager broadcast');
     this.clients.forEach((client: SocketClient) => {
       const details = client.subscriptions[topic];
       if (details && details.includes(detail)) {

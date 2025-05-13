@@ -1,3 +1,5 @@
+import WebSocket from 'ws'; // Node.js 환경이라 가정
+
 /**
  * 한투 실시간 체결 메시지를 파싱해 필요한 필드만 JSON 객체로 반환
  * @param rawStr 수신된 파이프 포맷 메시지
@@ -11,7 +13,7 @@ export function parseKisPipeMessage(rawStr: string) {
   const count = Number(countStr);
   const flat = rest.join('|').split('^');
 
-  // 필드 순서 기준 
+  // 필드 순서 기준
   const fieldIndexMap = {
     MKSC_SHRN_ISCD: 0,
     STCK_CNTG_HOUR: 1,
@@ -34,7 +36,7 @@ export function parseKisPipeMessage(rawStr: string) {
     STCK_LWPR: '저가',
   };
 
-  const oneLength = 22; // 전체 필드 수 
+  const oneLength = 22; // 전체 필드 수
   const records: { data: Record<string, string | null>; korparams: Record<string, string> }[] = [];
 
   for (let i = 0; i < count; i++) {
@@ -55,4 +57,25 @@ export function parseKisPipeMessage(rawStr: string) {
     count,
     records,
   };
+}
+export function toText(data: WebSocket.Data): string {
+  // 1) 이미 문자열이라면 그대로
+  if (typeof data === 'string') {
+    return data;
+  }
+  // 2) Buffer 배열일 때
+  if (Array.isArray(data)) {
+    return Buffer.concat(data).toString('utf-8');
+  }
+  // 3) ArrayBuffer일 때
+  if (data instanceof ArrayBuffer) {
+    return Buffer.from(data).toString('utf-8');
+  }
+  // 4) Buffer일 때
+  // (Buffer는 Node.js 전역에 있으므로 instanceof로 확인 가능)
+  if (Buffer.isBuffer(data)) {
+    return data.toString('utf-8');
+  }
+  // 그 외의 경우 (부득이하게) 빈 문자열
+  return '';
 }
