@@ -6,9 +6,9 @@ import { parseKisPipeMessage, toText } from './parseHant.js';
 
 export class ExternalConnector {
   // topic → WebSocket 인스턴스
-  private sockets = new Map<string, WebSocket>();
+  public sockets = new Map<string, WebSocket>();
   // topic → 현재 구독된 detail 목록
-  private subscribedDetails = new Map<string, Set<string>>();
+  public subscribedDetails = new Map<string, Set<string>>();
 
   constructor(private configs: EndpointsRecord) {}
 
@@ -110,13 +110,7 @@ export class ExternalConnector {
     if ((uuid && !cfg) || !ws || !details) {
       return '';
     }
-    console.log(this.configs[topic]);
-
-    console.log(details);
     details.clear();
-    console.log('cloear 이후');
-
-    console.log(details);
 
     // 2) 3자 서버에 해제 요청 전송
     const body = { ...cfg.bodyTemplate, tr_key: detail, unsub: true };
@@ -134,15 +128,15 @@ export class ExternalConnector {
   /** 클라이언트의 clearSubScreibe 이벤트가 발생했을 때 호출 */
   clearSubScreibe(uuid: string, topic: string) {
     const ws = this.sockets.get(topic);
-    const details = this.subscribedDetails.has(topic);
+    const details = this.subscribedDetails.get(topic);
 
-    if (!ws) {
+    if (!ws || !details) {
       return;
     }
 
     ws.removeAllListeners();
     ws.close();
     this.sockets.delete(topic);
-    this.subscribedDetails.delete(topic);
+    details.clear();
   }
 }

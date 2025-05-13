@@ -5,7 +5,10 @@ import { ExternalConnector } from './outSocket.js';
 
 export const ALLOW_SINGLE_KIS_SESSION = true;
 
+const hantooCall = ['realtime'];
+
 export class ClientManager {
+  /** <uuid , socketclient> */
   public clients = new Map<string, SocketClient>();
 
   constructor(
@@ -41,7 +44,7 @@ export class ClientManager {
     console.log('manager subscribe  ' + topic);
 
     // 세션 제한 검사
-    if (ALLOW_SINGLE_KIS_SESSION && this.clients.size > 0) {
+    if (isStock && this.clients.size > 0) {
       console.log('[세션 제한] 기존 세션 존재. 모두 제거 후 새로운 세션으로 교체.');
 
       for (const [existingUUID, client] of this.clients.entries()) {
@@ -104,13 +107,14 @@ export class ClientManager {
           ([otherUuid, otherClient]) =>
             otherUuid !== uuid && otherClient.subscriptions[topic]?.includes(detail)
         );
-        // 2) 아무도 안 쓰면 진짜 언구독
+        // 2) 아무도 안 쓰면 진짜 언구독 => 아무도 사용하지 않는topic을 삭제. + detail도 삭제해야함.
         if (!stillUsed) {
-          this.externalConnector.unsubscribe(topic, detail, uuid);
+          this.externalConnector.clearSubScreibe(uuid, topic);
         }
       }
     }
 
+    /**다른 client와 겹치기때문에 uuid만 목록에서 제거. 3자 서버의 연결은 유지. */
     this.clients.delete(uuid);
   }
 
